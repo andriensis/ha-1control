@@ -1,12 +1,12 @@
 {
   "domain": "onecontrol",
   "name": "1Control",
-  "version": "1.0.0",
-  "documentation": "https://github.com/andriensis/ha-1control",
-  "issue_tracker": "https://github.com/andriensis/ha-1control/issues",
-  "requirements": [],
-  "dependencies": [],
   "codeowners": ["@andriensis"],
   "config_flow": true,
-  "iot_class": "cloud_polling"
+  "dependencies": [],
+  "documentation": "https://github.com/andriensis/ha-1control",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/andriensis/ha-1control/issues",
+  "requirements": [],
+  "version": "1.0.0"
 }
