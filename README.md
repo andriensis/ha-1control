@@ -72,6 +72,26 @@ If you already have the 1Control dashboard set up and linked to your Solo device
 
 State is tracked **optimistically**: after an open command the entity reports open, then automatically reverts to closed after 10 seconds to mirror the gate's physical auto-close behaviour. There is no real-time state feedback from the cloud API.
 
+## Architecture & credentials
+
+```
+Home Assistant
+      │
+      │  email + password (stored in HA config entry)
+      ▼
+1Control Firebase Auth  ──►  short-lived ID token (1 hour, auto-refreshed)
+      │
+      │  Bearer token + API key
+      ▼
+1Control Cloud API (onecontrolcloud.appspot.com)
+      │
+      │  trigger command
+      ▼
+   Link bridge  ──►  Solo device  ──►  gate/door
+```
+
+**Your credentials are never sent anywhere except 1Control's own servers.** The email and password you enter are used solely to obtain a Firebase ID token from 1Control's authentication service — the same call the official mobile app makes. The token is short-lived and automatically refreshed; your password is only used again if the refresh token expires. No credentials are logged or transmitted to any third party.
+
 ## Troubleshooting
 
 - **"No devices found"** — ensure your Solo has at least one configured action (cloned action) in the 1Control app, and that a Link bridge is paired to it.
