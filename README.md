@@ -70,7 +70,7 @@ If you already have the 1Control dashboard set up and linked to your Solo device
 |-------------|-------------|-------------------|
 | Cover | Garage | Open, Close |
 
-State is tracked **optimistically**: after an open command the entity reports open, then automatically reverts to closed after 15 seconds to mirror the gate's physical auto-close behaviour. There is no real-time state feedback from the cloud API.
+State is tracked **optimistically**: after an open command the entity reports open, then automatically reverts to closed after 10 seconds to mirror the gate's physical auto-close behaviour. There is no real-time state feedback from the cloud API.
 
 ## Troubleshooting
 
