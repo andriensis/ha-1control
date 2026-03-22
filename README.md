@@ -6,7 +6,7 @@
 >
 > This integration was vibe coded with [Claude](https://claude.ai) — it works, but treat it accordingly.
 
-A Home Assistant custom integration for controlling **1Control Solo** gates and doors via the 1Control cloud (Link2 bridge required).
+A Home Assistant custom integration for controlling **1Control Solo** gates and doors via the 1Control cloud (Link bridge required).
 
 ## Features
 
@@ -16,9 +16,22 @@ A Home Assistant custom integration for controlling **1Control Solo** gates and 
 
 ## Requirements
 
-- A [1Control](https://www.1control.it) account with at least one **Solo** device
-- A **Link2** bridge paired to the Solo (required for remote/cloud control)
+- A 1Control web account (see below)
+- A **Solo** device added to your web account
+- A **Link** bridge paired to the Solo (required for remote/cloud control)
 - Home Assistant 2024.1 or later
+
+## Setting up a 1Control web account
+
+If you already have the 1Control dashboard set up and linked to your Solo device you can skip this step.
+
+1. Create an account at [web.1control.eu](https://web.1control.eu/)
+2. Make a note of your email and password — you will need them during integration setup
+3. Once the account is created, go to the [dashboard](https://web.1control.eu/web/en/#/dashboard)
+4. Click **Add** in the "Add device" section and select **Solo device**
+5. Follow the on-screen guide to add a web user to your Solo device
+
+> **Note:** You need to be physically close to your 1Control Solo during this setup step.
 
 ## Installation
 
@@ -51,7 +64,7 @@ State is tracked **optimistically**: after an open command the entity reports op
 
 ## Troubleshooting
 
-- **"No devices found"** — ensure your Solo has at least one configured action (cloned action) in the 1Control app, and that a Link2 bridge is paired to it.
+- **"No devices found"** — ensure your Solo has at least one configured action (cloned action) in the 1Control app, and that a Link bridge is paired to it.
 - **"Invalid auth"** — double-check your 1Control app email and password.
 - **Gate triggered but HA shows error** — check the HA logs (`Settings → System → Logs`) for details from the `onecontrol` component.
 
