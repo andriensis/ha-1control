@@ -1,0 +1,44 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connect to 1Control",
+        "description": "Enter your 1Control web dashboard credentials.",
+        "data": {
+          "email": "Email",
+          "password": "Password"
+        }
+      },
+      "select_devices": {
+        "title": "Select devices",
+        "description": "Choose which 1Control devices to add to Home Assistant.",
+        "data": {
+          "devices": "Devices"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Invalid email or password.",
+      "cannot_connect": "Unable to connect to 1Control. Please check your internet connection.",
+      "no_devices_found": "No devices found on this account.",
+      "no_devices_selected": "Please select at least one device.",
+      "unknown": "An unexpected error occurred."
+    },
+    "abort": {
+      "already_configured": "This 1Control account is already configured."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "1Control options",
+        "data": {
+          "auto_close_delay": "Auto-close delay"
+        },
+        "data_description": {
+          "auto_close_delay": "Seconds after an open command before Home Assistant marks the gate as closed again."
+        }
+      }
+    }
+  }
+}

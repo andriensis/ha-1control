@@ -1,0 +1,31 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connetti a 1Control",
+        "description": "Inserisci le credenziali della dashboard web di 1Control.",
+        "data": {
+          "email": "Email",
+          "password": "Password"
+        }
+      },
+      "select_devices": {
+        "title": "Seleziona dispositivi",
+        "description": "Scegli quali dispositivi 1Control aggiungere a Home Assistant.",
+        "data": {
+          "devices": "Dispositivi"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Email o password non validi.",
+      "cannot_connect": "Impossibile connettersi a 1Control. Controlla la connessione a Internet.",
+      "no_devices_found": "Nessun dispositivo trovato su questo account.",
+      "no_devices_selected": "Seleziona almeno un dispositivo.",
+      "unknown": "Si è verificato un errore imprevisto."
+    },
+    "abort": {
+      "already_configured": "Questo account 1Control è già configurato."
+    }
+  }
+}
