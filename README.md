@@ -54,6 +54,16 @@ If you already have the 1Control dashboard set up and linked to your Solo device
 3. Enter your 1Control account email and password
 4. Select which gates/doors to add — each configured action on a Solo appears as a separate entity
 
+## Screenshots
+
+| Login | Select devices |
+|-------|---------------|
+| ![Login](docs/login.png) | ![Select devices](docs/select-devices.png) |
+
+| Integration | Gate entity |
+|-------------|------------|
+| ![Integration](docs/integration.png) | ![Gate](docs/gate.png) |
+
 ## Entities
 
 | Entity type | Device class | Supported features |
