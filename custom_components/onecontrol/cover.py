@@ -26,7 +26,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up 1Control cover entities from a config entry."""
-    api: OneControlAPI = hass.data[DOMAIN][entry.entry_id]
+    api: OneControlAPI = hass.data[DOMAIN][entry.entry_id]["api"]
 
     auto_close_delay = int(entry.options.get(CONF_AUTO_CLOSE_DELAY, AUTO_CLOSE_DELAY))
     entities = [

@@ -27,5 +27,25 @@
     "abort": {
       "already_configured": "Questo account 1Control è già configurato."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opzioni 1Control",
+        "data": {
+          "auto_close_delay": "Ritardo di auto-chiusura",
+          "pin": "PIN"
+        },
+        "data_description": {
+          "auto_close_delay": "Secondi dopo un comando di apertura prima che Home Assistant segni il cancello come chiuso.",
+          "pin": "Opzionale. Se impostato, il cancello viene esposto come entità lock e questo PIN è richiesto per aprirlo o chiuderlo. Lascia vuoto per usare l'entità cover standard senza PIN."
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "invalid_pin": {
+      "message": "PIN errato."
+    }
   }
 }
