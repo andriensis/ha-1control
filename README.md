@@ -13,6 +13,7 @@ A Home Assistant custom integration for controlling **1Control Solo** gates and 
 - Automatically discovers all gates/doors linked to your 1Control account
 - Each configured action appears as a **Cover** entity (device class: Gate)
 - Supports open and close commands
+- Optional **PIN protection** — when a PIN is set, the gate is exposed as a **Lock** entity that prompts for the PIN before opening or closing
 
 ## Requirements
 
@@ -67,6 +68,8 @@ Click the button above to start the setup, or go to **Settings > Devices & Servi
 1. Copy the `custom_components/onecontrol/` folder into your HA `config/custom_components/` directory
 2. Restart Home Assistant
 
+> **Note:** manual installs don't receive update notifications. To stay on the latest version you'll need to watch this repository for new releases and re-copy the folder each time. Use [HACS](#via-hacs-recommended) if you'd like automatic update notifications in Home Assistant.
+
 ## Setup
 
 1. Go to **Settings → Devices & Services → Add Integration**
@@ -84,13 +87,29 @@ Click the button above to start the setup, or go to **Settings > Devices & Servi
 |-------------|------------|
 | ![Integration](docs/integration.png) | ![Gate](docs/gate.png) |
 
+| Integration settings |
+|----------------------|
+| ![Integration settings](docs/integration-settings.png) |
+
 ## Entities
 
-| Entity type | Device class | Supported features |
-|-------------|-------------|-------------------|
-| Cover | Garage | Open, Close |
+| Entity type | Device class | Supported features | When used |
+|-------------|-------------|-------------------|-----------|
+| Cover | Garage | Open, Close | No PIN configured (default) |
+| Lock | — | Lock, Unlock (PIN required) | PIN configured in options |
 
-State is tracked **optimistically**: after an open command the entity reports open, then automatically reverts to closed after 10 seconds to mirror the gate's physical auto-close behaviour. There is no real-time state feedback from the cloud API.
+State is tracked **optimistically**: after an open/unlock command the entity reports open, then automatically reverts to closed/locked after the configured auto-close delay to mirror the gate's physical auto-close behaviour. There is no real-time state feedback from the cloud API.
+
+## Options
+
+Open the integration's **Configure** button (**Settings → Devices & Services → 1Control → Configure**) to adjust:
+
+- **Auto-close delay** — seconds after an open command before Home Assistant marks the gate as closed again. Tune this to match your gate's physical auto-close timing.
+- **PIN** — optional. Leave empty (default) to keep the standard cover entity with no PIN. Enter a value to expose the gate as a **lock** entity instead: Home Assistant's lock card will then prompt for this PIN before opening or closing. All-digit PINs show a numeric keypad.
+
+Changing the PIN (setting, clearing, or updating it) reloads the integration and swaps between the cover and lock entity. Existing dashboard cards and automations referencing the old entity ID will need to be updated to the new one.
+
+> **Note on PIN security:** the PIN is a convenience gate to prevent casual/accidental opens from the Home Assistant UI. It is stored in plain text in your Home Assistant config and is not a substitute for proper access control.
 
 ## Architecture & credentials
 

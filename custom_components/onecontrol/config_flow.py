@@ -21,7 +21,14 @@ from homeassistant.helpers.selector import (
 )
 
 from .api import OneControlAPI, OneControlAuthError, OneControlAPIError
-from .const import AUTO_CLOSE_DELAY, CONF_AUTO_CLOSE_DELAY, CONF_DEVICES, CONF_UID, DOMAIN
+from .const import (
+    AUTO_CLOSE_DELAY,
+    CONF_AUTO_CLOSE_DELAY,
+    CONF_DEVICES,
+    CONF_PIN,
+    CONF_UID,
+    DOMAIN,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -46,14 +53,26 @@ class OneControlOptionsFlow(OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         if user_input is not None:
+            # Normalise: treat whitespace-only PIN as unset so the entity
+            # swap back to a cover triggers cleanly.
+            pin = (user_input.get(CONF_PIN) or "").strip()
+            user_input[CONF_PIN] = pin
             return self.async_create_entry(data=user_input)
 
         current_delay = self.config_entry.options.get(CONF_AUTO_CLOSE_DELAY, AUTO_CLOSE_DELAY)
+        current_pin = self.config_entry.options.get(CONF_PIN, "")
+        # Use suggested_value rather than default= so clearing the field
+        # actually clears the PIN — default= would backfill the old value
+        # whenever the field comes back empty.
         schema = vol.Schema(
             {
                 vol.Required(CONF_AUTO_CLOSE_DELAY, default=current_delay): NumberSelector(
                     NumberSelectorConfig(min=5, max=300, step=1, mode=NumberSelectorMode.BOX, unit_of_measurement="s")
                 ),
+                vol.Optional(
+                    CONF_PIN,
+                    description={"suggested_value": current_pin},
+                ): TextSelector(TextSelectorConfig(type=TextSelectorType.PASSWORD)),
             }
         )
         return self.async_show_form(step_id="init", data_schema=schema)
