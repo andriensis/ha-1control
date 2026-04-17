@@ -33,12 +33,19 @@
       "init": {
         "title": "1Control options",
         "data": {
-          "auto_close_delay": "Auto-close delay"
+          "auto_close_delay": "Auto-close delay",
+          "pin": "PIN"
         },
         "data_description": {
-          "auto_close_delay": "Seconds after an open command before Home Assistant marks the gate as closed again."
+          "auto_close_delay": "Seconds after an open command before Home Assistant marks the gate as closed again.",
+          "pin": "Optional. If set, the gate is exposed as a lock entity and this PIN must be entered to open or close it. Leave empty for a standard cover entity with no PIN."
         }
       }
+    }
+  },
+  "exceptions": {
+    "invalid_pin": {
+      "message": "Incorrect PIN."
     }
   }
 }

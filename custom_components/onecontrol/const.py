@@ -19,6 +19,7 @@ API_BASE_URL = "https://onecontrolcloud.appspot.com/_ah/api/webAdmin/v1"
 CONF_DEVICES = "devices"
 CONF_UID = "uid"
 CONF_AUTO_CLOSE_DELAY = "auto_close_delay"
+CONF_PIN = "pin"
 
 # Seconds before HA marks the gate as closed again after an open command.
 # RF gates auto-close on their own; this keeps HA state in sync.
