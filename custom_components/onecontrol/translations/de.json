@@ -1,0 +1,51 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Mit 1Control verbinden",
+        "description": "Gib die Zugangsdaten deines 1Control-Web-Dashboards ein.",
+        "data": {
+          "email": "E-Mail",
+          "password": "Passwort"
+        }
+      },
+      "select_devices": {
+        "title": "Geräte auswählen",
+        "description": "Wähle aus, welche 1Control-Geräte zu Home Assistant hinzugefügt werden sollen.",
+        "data": {
+          "devices": "Geräte"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Ungültige E-Mail-Adresse oder ungültiges Passwort.",
+      "cannot_connect": "Verbindung zu 1Control fehlgeschlagen. Bitte überprüfe deine Internetverbindung.",
+      "no_devices_found": "Keine Geräte für dieses Konto gefunden.",
+      "no_devices_selected": "Bitte wähle mindestens ein Gerät aus.",
+      "unknown": "Ein unerwarteter Fehler ist aufgetreten."
+    },
+    "abort": {
+      "already_configured": "Dieses 1Control-Konto ist bereits konfiguriert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "1Control-Optionen",
+        "data": {
+          "auto_close_delay": "Verzögerung für automatisches Schließen",
+          "pin": "PIN"
+        },
+        "data_description": {
+          "auto_close_delay": "Sekunden nach einem Öffnungsbefehl, bis Home Assistant das Tor wieder als geschlossen markiert.",
+          "pin": "Optional. Wenn gesetzt, wird das Tor als Lock-Entität bereitgestellt und diese PIN muss zum Öffnen oder Schließen eingegeben werden. Leer lassen, um die Standard-Cover-Entität ohne PIN zu verwenden."
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "invalid_pin": {
+      "message": "Falsche PIN."
+    }
+  }
+}
