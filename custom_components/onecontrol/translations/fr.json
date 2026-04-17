@@ -1,0 +1,51 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Se connecter à 1Control",
+        "description": "Saisissez les identifiants de votre tableau de bord web 1Control.",
+        "data": {
+          "email": "E-mail",
+          "password": "Mot de passe"
+        }
+      },
+      "select_devices": {
+        "title": "Sélectionner les appareils",
+        "description": "Choisissez les appareils 1Control à ajouter à Home Assistant.",
+        "data": {
+          "devices": "Appareils"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "E-mail ou mot de passe incorrect.",
+      "cannot_connect": "Impossible de se connecter à 1Control. Vérifiez votre connexion Internet.",
+      "no_devices_found": "Aucun appareil trouvé sur ce compte.",
+      "no_devices_selected": "Veuillez sélectionner au moins un appareil.",
+      "unknown": "Une erreur inattendue est survenue."
+    },
+    "abort": {
+      "already_configured": "Ce compte 1Control est déjà configuré."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options 1Control",
+        "data": {
+          "auto_close_delay": "Délai de fermeture automatique",
+          "pin": "Code PIN"
+        },
+        "data_description": {
+          "auto_close_delay": "Secondes après une commande d'ouverture avant que Home Assistant ne marque le portail comme fermé.",
+          "pin": "Optionnel. Si défini, le portail est exposé en tant qu'entité lock et ce code PIN doit être saisi pour l'ouvrir ou le fermer. Laissez vide pour utiliser une entité cover standard sans PIN."
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "invalid_pin": {
+      "message": "Code PIN incorrect."
+    }
+  }
+}
