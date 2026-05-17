@@ -25,9 +25,14 @@ from .const import (
     AUTO_CLOSE_DELAY,
     CONF_AUTO_CLOSE_DELAY,
     CONF_DEVICES,
+    CONF_DORY_DEVICES,
+    CONF_DORY_UPDATE_INTERVAL,
     CONF_PIN,
     CONF_UID,
     DOMAIN,
+    DORY_UPDATE_INTERVAL,
+    DORY_UPDATE_INTERVAL_MAX,
+    DORY_UPDATE_INTERVAL_MIN,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -61,21 +66,36 @@ class OneControlOptionsFlow(OptionsFlow):
 
         current_delay = self.config_entry.options.get(CONF_AUTO_CLOSE_DELAY, AUTO_CLOSE_DELAY)
         current_pin = self.config_entry.options.get(CONF_PIN, "")
-        # Use suggested_value rather than default= so clearing the field
-        # actually clears the PIN — default= would backfill the old value
-        # whenever the field comes back empty.
-        schema = vol.Schema(
-            {
-                vol.Required(CONF_AUTO_CLOSE_DELAY, default=current_delay): NumberSelector(
-                    NumberSelectorConfig(min=5, max=300, step=1, mode=NumberSelectorMode.BOX, unit_of_measurement="s")
-                ),
-                vol.Optional(
-                    CONF_PIN,
-                    description={"suggested_value": current_pin},
-                ): TextSelector(TextSelectorConfig(type=TextSelectorType.PASSWORD)),
-            }
+        current_dory_interval = self.config_entry.options.get(
+            CONF_DORY_UPDATE_INTERVAL, DORY_UPDATE_INTERVAL
         )
-        return self.async_show_form(step_id="init", data_schema=schema)
+        has_dory = bool(self.config_entry.data.get(CONF_DORY_DEVICES))
+
+        schema_dict: dict = {
+            vol.Required(CONF_AUTO_CLOSE_DELAY, default=current_delay): NumberSelector(
+                NumberSelectorConfig(min=5, max=300, step=1, mode=NumberSelectorMode.BOX, unit_of_measurement="s")
+            ),
+            # Use suggested_value rather than default= so clearing the field
+            # actually clears the PIN — default= would backfill the old value
+            # whenever the field comes back empty.
+            vol.Optional(
+                CONF_PIN,
+                description={"suggested_value": current_pin},
+            ): TextSelector(TextSelectorConfig(type=TextSelectorType.PASSWORD)),
+        }
+        if has_dory:
+            schema_dict[
+                vol.Required(CONF_DORY_UPDATE_INTERVAL, default=current_dory_interval)
+            ] = NumberSelector(
+                NumberSelectorConfig(
+                    min=DORY_UPDATE_INTERVAL_MIN,
+                    max=DORY_UPDATE_INTERVAL_MAX,
+                    step=1,
+                    mode=NumberSelectorMode.BOX,
+                    unit_of_measurement="s",
+                )
+            )
+        return self.async_show_form(step_id="init", data_schema=vol.Schema(schema_dict))
 
 
 class OneControlConfigFlow(ConfigFlow, domain=DOMAIN):
@@ -93,6 +113,8 @@ class OneControlConfigFlow(ConfigFlow, domain=DOMAIN):
         self._uid: str = ""
         # Each item: {serial, link_serial, action, name, device_name}
         self._discovered_devices: list[dict] = []
+        # Each item: {serial, name, opened, opened_state_date, battery, firmware_version}
+        self._discovered_dory_devices: list[dict] = []
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -110,6 +132,7 @@ class OneControlConfigFlow(ConfigFlow, domain=DOMAIN):
             try:
                 self._uid = await api.authenticate()
                 self._discovered_devices = await api.get_devices()
+                self._discovered_dory_devices = await api.get_dory_devices()
             except OneControlAuthError:
                 errors["base"] = "invalid_auth"
             except OneControlAPIError:
@@ -118,11 +141,14 @@ class OneControlConfigFlow(ConfigFlow, domain=DOMAIN):
                 _LOGGER.exception("Unexpected error during authentication")
                 errors["base"] = "unknown"
             else:
-                if not self._discovered_devices:
+                if not self._discovered_devices and not self._discovered_dory_devices:
                     errors["base"] = "no_devices_found"
 
             if not errors:
-                return await self.async_step_select_devices()
+                if self._discovered_devices:
+                    return await self.async_step_select_devices()
+                # Dory-only account: no Solo action selection needed.
+                return self._create_entry([])
 
         return self.async_show_form(
             step_id="user",
@@ -187,5 +213,6 @@ class OneControlConfigFlow(ConfigFlow, domain=DOMAIN):
                 "password": self._password,
                 CONF_UID: self._uid,
                 CONF_DEVICES: devices,
+                CONF_DORY_DEVICES: self._discovered_dory_devices,
             },
         )

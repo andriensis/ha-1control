@@ -9,19 +9,23 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import OneControlAPI
-from .const import CONF_PIN, DOMAIN
+from .const import CONF_DEVICES, CONF_DORY_DEVICES, CONF_PIN, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
 
 def _platforms_for_entry(entry: ConfigEntry) -> list[str]:
-    """Pick the platform based on whether a PIN is configured.
+    """Active platforms based on what's configured.
 
-    No PIN → cover (default). PIN set → lock (prompts for code in the UI).
+    Solo actions → cover (no PIN) or lock (PIN set). Dory sensors → binary_sensor.
+    Both can be active at once on accounts with mixed hardware.
     """
-    if entry.options.get(CONF_PIN):
-        return ["lock"]
-    return ["cover"]
+    platforms: list[str] = []
+    if entry.data.get(CONF_DEVICES):
+        platforms.append("lock" if entry.options.get(CONF_PIN) else "cover")
+    if entry.data.get(CONF_DORY_DEVICES):
+        platforms.append("binary_sensor")
+    return platforms
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
