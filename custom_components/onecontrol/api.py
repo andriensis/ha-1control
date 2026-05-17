@@ -178,6 +178,49 @@ class OneControlAPI:
 
         return devices
 
+    async def get_dory_devices(self) -> list[dict]:
+        """Return all Dory door/gate position sensors on the account.
+
+        Each entry has:
+          serial             – Dory device serial (int)
+          name               – friendly name
+          opened             – current door state (bool; True = open)
+          opened_state_date  – ISO timestamp of last state change
+          battery            – raw battery reading from systemInfo (units unverified)
+          firmware_version   – firmware version (int)
+        """
+        await self._ensure_token()
+        try:
+            async with self._session.get(
+                self._url("devices/dory"),
+                headers=self._auth_headers,
+            ) as resp:
+                if resp.status != 200:
+                    _LOGGER.warning("GET devices/dory returned %s", resp.status)
+                    return []
+                data = await resp.json()
+        except aiohttp.ClientError as err:
+            raise OneControlAPIError(f"Failed to list dory devices: {err}") from err
+
+        items = data.get("items", []) if isinstance(data, dict) else []
+        devices: list[dict] = []
+        for item in items:
+            serial = item.get("serial")
+            if serial is None:
+                continue
+            system_info = item.get("systemInfo") or {}
+            devices.append(
+                {
+                    "serial": serial,
+                    "name": item.get("name") or f"Dory {serial}",
+                    "opened": bool(item.get("opened")),
+                    "opened_state_date": item.get("openStateDate"),
+                    "battery": system_info.get("battery"),
+                    "firmware_version": system_info.get("version"),
+                }
+            )
+        return devices
+
     async def _get_link_serial(self, solo_serial: int) -> int | None:
         """Return the serial of the Link device paired with a Solo, or None."""
         try:

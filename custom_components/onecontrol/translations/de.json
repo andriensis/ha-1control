@@ -34,11 +34,13 @@
         "title": "1Control-Optionen",
         "data": {
           "auto_close_delay": "Verzögerung für automatisches Schließen",
-          "pin": "PIN"
+          "pin": "PIN",
+          "dory_update_interval": "Dory-Abfrageintervall"
         },
         "data_description": {
           "auto_close_delay": "Sekunden nach einem Öffnungsbefehl, bis Home Assistant das Tor wieder als geschlossen markiert.",
-          "pin": "Optional. Wenn gesetzt, wird das Tor als Lock-Entität bereitgestellt und diese PIN muss zum Öffnen oder Schließen eingegeben werden. Leer lassen, um die Standard-Cover-Entität ohne PIN zu verwenden."
+          "pin": "Optional. Wenn gesetzt, wird das Tor als Lock-Entität bereitgestellt und diese PIN muss zum Öffnen oder Schließen eingegeben werden. Leer lassen, um die Standard-Cover-Entität ohne PIN zu verwenden.",
+          "dory_update_interval": "Wie oft die 1Control-Cloud nach dem Status des Dory-Türsensors abgefragt wird. Niedrigere Werte liefern schnellere Aktualisierungen, erhöhen aber die Last auf die 1Control-API; der Cloud-seitige Status aktualisiert sich ohnehin nur, sobald der Sensor selbst meldet."
         }
       }
     }

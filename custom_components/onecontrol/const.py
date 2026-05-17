@@ -17,10 +17,19 @@ BACKEND_API_KEY = "AIzaSyDt90BzaVvT167H7t2o7QXZHnAjb-EClGw"
 API_BASE_URL = "https://onecontrolcloud.appspot.com/_ah/api/webAdmin/v1"
 
 CONF_DEVICES = "devices"
+CONF_DORY_DEVICES = "dory_devices"
 CONF_UID = "uid"
 CONF_AUTO_CLOSE_DELAY = "auto_close_delay"
 CONF_PIN = "pin"
+CONF_DORY_UPDATE_INTERVAL = "dory_update_interval"
 
 # Seconds before HA marks the gate as closed again after an open command.
 # RF gates auto-close on their own; this keeps HA state in sync.
 AUTO_CLOSE_DELAY = 10
+
+# Dory state polling. Default 60s; users can tune, but never below
+# DORY_UPDATE_INTERVAL_MIN — the 1Control cloud is shared infrastructure
+# and aggressive polling risks throttling for everyone.
+DORY_UPDATE_INTERVAL = 60
+DORY_UPDATE_INTERVAL_MIN = 30
+DORY_UPDATE_INTERVAL_MAX = 600

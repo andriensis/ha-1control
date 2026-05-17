@@ -34,11 +34,13 @@
         "title": "1Control options",
         "data": {
           "auto_close_delay": "Auto-close delay",
-          "pin": "PIN"
+          "pin": "PIN",
+          "dory_update_interval": "Dory polling interval"
         },
         "data_description": {
           "auto_close_delay": "Seconds after an open command before Home Assistant marks the gate as closed again.",
-          "pin": "Optional. If set, the gate is exposed as a lock entity and this PIN must be entered to open or close it. Leave empty for a standard cover entity with no PIN."
+          "pin": "Optional. If set, the gate is exposed as a lock entity and this PIN must be entered to open or close it. Leave empty for a standard cover entity with no PIN.",
+          "dory_update_interval": "How often to poll the 1Control cloud for Dory door sensor state. Lower values give faster updates but increase load on the 1Control API; the cloud-side state only updates as fast as the sensor reports anyway."
         }
       }
     }
