@@ -99,7 +99,7 @@ class OneControlDorySensor(CoordinatorEntity[DoryCoordinator], BinarySensorEntit
 
     @property
     def available(self) -> bool:
-        return super().available and self._state() is not None
+        return self._state() is not None
 
     @property
     def is_on(self) -> bool | None:

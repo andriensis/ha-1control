@@ -196,8 +196,12 @@ class OneControlAPI:
                 headers=self._auth_headers,
             ) as resp:
                 if resp.status != 200:
-                    _LOGGER.warning("GET devices/dory returned %s", resp.status)
-                    return []
+                    # Raise instead of returning [] so callers polling for
+                    # state (the binary_sensor coordinator) treat this as a
+                    # transient failure and keep their last-known cache.
+                    raise OneControlAPIError(
+                        f"GET devices/dory returned {resp.status}"
+                    )
                 data = await resp.json()
         except aiohttp.ClientError as err:
             raise OneControlAPIError(f"Failed to list dory devices: {err}") from err
