@@ -1,9 +1,6 @@
 """1Control Dory binary sensor entities (door/gate position sensors)."""
 from __future__ import annotations
 
-import logging
-from datetime import timedelta
-
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
     BinarySensorEntity,
@@ -12,44 +9,10 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import (
-    CoordinatorEntity,
-    DataUpdateCoordinator,
-    UpdateFailed,
-)
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .api import OneControlAPI, OneControlAPIError
-from .const import (
-    CONF_DORY_DEVICES,
-    CONF_DORY_UPDATE_INTERVAL,
-    DOMAIN,
-    DORY_UPDATE_INTERVAL,
-    DORY_UPDATE_INTERVAL_MIN,
-)
-
-_LOGGER = logging.getLogger(__name__)
-
-
-class DoryCoordinator(DataUpdateCoordinator[dict[int, dict]]):
-    """Polls /devices/dory and keys state by Dory serial."""
-
-    def __init__(
-        self, hass: HomeAssistant, api: OneControlAPI, interval_seconds: int
-    ) -> None:
-        super().__init__(
-            hass,
-            _LOGGER,
-            name="1Control Dory",
-            update_interval=timedelta(seconds=interval_seconds),
-        )
-        self._api = api
-
-    async def _async_update_data(self) -> dict[int, dict]:
-        try:
-            devices = await self._api.get_dory_devices()
-        except OneControlAPIError as err:
-            raise UpdateFailed(f"Failed to fetch Dory state: {err}") from err
-        return {d["serial"]: d for d in devices}
+from .const import CONF_DORY_DEVICES, DOMAIN
+from .coordinator import DoryCoordinator
 
 
 async def async_setup_entry(
@@ -58,15 +21,7 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up 1Control Dory binary sensors from a config entry."""
-    api: OneControlAPI = hass.data[DOMAIN][entry.entry_id]["api"]
-
-    interval = max(
-        DORY_UPDATE_INTERVAL_MIN,
-        int(entry.options.get(CONF_DORY_UPDATE_INTERVAL, DORY_UPDATE_INTERVAL)),
-    )
-    coordinator = DoryCoordinator(hass, api, interval)
-    await coordinator.async_config_entry_first_refresh()
-
+    coordinator: DoryCoordinator = hass.data[DOMAIN][entry.entry_id]["dory_coordinator"]
     configured = entry.data.get(CONF_DORY_DEVICES, [])
     async_add_entities(
         OneControlDorySensor(coordinator, device) for device in configured

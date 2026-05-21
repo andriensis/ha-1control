@@ -9,7 +9,16 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import OneControlAPI
-from .const import CONF_DEVICES, CONF_DORY_DEVICES, CONF_PIN, DOMAIN
+from .const import (
+    CONF_DEVICES,
+    CONF_DORY_DEVICES,
+    CONF_DORY_UPDATE_INTERVAL,
+    CONF_PIN,
+    DOMAIN,
+    DORY_UPDATE_INTERVAL,
+    DORY_UPDATE_INTERVAL_MIN,
+)
+from .coordinator import DoryCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -17,14 +26,16 @@ _LOGGER = logging.getLogger(__name__)
 def _platforms_for_entry(entry: ConfigEntry) -> list[str]:
     """Active platforms based on what's configured.
 
-    Solo actions → cover (no PIN) or lock (PIN set). Dory sensors → binary_sensor.
-    Both can be active at once on accounts with mixed hardware.
+    Solo actions → cover (no PIN) or lock (PIN set).
+    Dory sensors → binary_sensor (door state) + sensor (battery, last change).
+    Both groups can be active at once on accounts with mixed hardware.
     """
     platforms: list[str] = []
     if entry.data.get(CONF_DEVICES):
         platforms.append("lock" if entry.options.get(CONF_PIN) else "cover")
     if entry.data.get(CONF_DORY_DEVICES):
         platforms.append("binary_sensor")
+        platforms.append("sensor")
     return platforms
 
 
@@ -36,10 +47,21 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     _purge_stale_entities(hass, entry, platforms)
 
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {
-        "api": api,
-        "platforms": platforms,
-    }
+    stored: dict = {"api": api, "platforms": platforms}
+
+    if entry.data.get(CONF_DORY_DEVICES):
+        interval = max(
+            DORY_UPDATE_INTERVAL_MIN,
+            int(entry.options.get(CONF_DORY_UPDATE_INTERVAL, DORY_UPDATE_INTERVAL)),
+        )
+        coordinator = DoryCoordinator(hass, api, interval)
+        # Block until the first poll succeeds — raises ConfigEntryNotReady on
+        # failure so HA retries the entry. Without this, the new sensor
+        # platform would briefly show entities with empty state.
+        await coordinator.async_config_entry_first_refresh()
+        stored["dory_coordinator"] = coordinator
+
+    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = stored
 
     await hass.config_entries.async_forward_entry_setups(entry, platforms)
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))

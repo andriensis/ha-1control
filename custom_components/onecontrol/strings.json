@@ -49,5 +49,15 @@
     "invalid_pin": {
       "message": "Incorrect PIN."
     }
+  },
+  "entity": {
+    "sensor": {
+      "battery": {
+        "name": "Battery"
+      },
+      "last_state_change": {
+        "name": "Last state change"
+      }
+    }
   }
 }
