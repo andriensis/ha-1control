@@ -17,10 +17,25 @@ BACKEND_API_KEY = "AIzaSyDt90BzaVvT167H7t2o7QXZHnAjb-EClGw"
 API_BASE_URL = "https://onecontrolcloud.appspot.com/_ah/api/webAdmin/v1"
 
 CONF_DEVICES = "devices"
+CONF_DORY_DEVICES = "dory_devices"
 CONF_UID = "uid"
 CONF_AUTO_CLOSE_DELAY = "auto_close_delay"
 CONF_PIN = "pin"
+CONF_DORY_UPDATE_INTERVAL = "dory_update_interval"
 
 # Seconds before HA marks the gate as closed again after an open command.
 # RF gates auto-close on their own; this keeps HA state in sync.
 AUTO_CLOSE_DELAY = 10
+
+# Dory state polling. Default 60s; users can tune, but never below
+# DORY_UPDATE_INTERVAL_MIN — the 1Control cloud is shared infrastructure
+# and aggressive polling risks throttling for everyone.
+DORY_UPDATE_INTERVAL = 60
+DORY_UPDATE_INTERVAL_MIN = 30
+DORY_UPDATE_INTERVAL_MAX = 600
+
+# Dory battery is 2× CR2032 in series. Raw API value is the cell-pair voltage
+# in millivolts. CR2032 nominal is 3.0V (so 6000 mV fresh) and the discharge
+# curve stays flat until roughly 2.5V/cell (5000 mV total) where it falls off a cliff.
+DORY_BATTERY_HIGH_MV = 5700
+DORY_BATTERY_MEDIUM_MV = 5300

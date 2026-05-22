@@ -6,21 +6,31 @@
 >
 > This integration was vibe coded with [Claude](https://claude.ai) — it works, but treat it accordingly.
 
-A Home Assistant custom integration for controlling **1Control Solo** gates and doors via the 1Control cloud (Link bridge required).
+A Home Assistant custom integration for **1Control Solo** gates and doors (via a Link bridge) and **1Control Dory** door/gate position sensors. Everything runs against the official 1Control cloud — no local hub required beyond the Link bridge for Solo control.
 
 ## Features
+
+**Solo gates/doors**
 
 - Automatically discovers all gates/doors linked to your 1Control account
 - Each configured action appears as a **Cover** entity (device class: Gate)
 - Supports open and close commands
 - Optional **PIN protection** — when a PIN is set, the gate is exposed as a **Lock** entity that prompts for the PIN before opening or closing
 
+**Dory door/gate sensors**
+
+- Automatically discovers all Dory sensors linked to your 1Control account
+- Each Dory appears as a **Binary sensor** (device class: Garage door) reflecting the real open/closed state reported to the cloud
+- Plus two diagnostic sensors per Dory: **Battery** (raw value) and **Last state change** (timestamp)
+- Cloud-polled at a user-configurable interval (default 60 s, minimum 30 s)
+
 ## Requirements
 
 - A 1Control web account (see below)
-- A **Solo** device added to your web account
-- A **Link** bridge paired to the Solo (required for remote/cloud control)
 - Home Assistant 2024.1 or later
+- At least one of:
+  - A **Solo** device paired with a **Link** bridge (for cover/lock control), and/or
+  - A **Dory** door/gate sensor (for binary_sensor + diagnostic sensors)
 
 ## Setting up a 1Control web account
 
@@ -77,6 +87,8 @@ Click the button above to start the setup, or go to **Settings > Devices & Servi
 3. Enter your 1Control account email and password
 4. Select which gates/doors to add — each configured action on a Solo appears as a separate entity
 
+Dory sensors found on the account are added automatically and do not require selection. If your account has only Dory sensors (no Solo), step 4 is skipped.
+
 ## Screenshots
 
 | Login | Select devices |
@@ -93,12 +105,24 @@ Click the button above to start the setup, or go to **Settings > Devices & Servi
 
 ## Entities
 
+**Solo** (one entity per configured action)
+
 | Entity type | Device class | Supported features | When used |
 |-------------|-------------|-------------------|-----------|
 | Cover | Garage | Open, Close | No PIN configured (default) |
 | Lock | — | Lock, Unlock (PIN required) | PIN configured in options |
 
-State is tracked **optimistically**: after an open/unlock command the entity reports open, then automatically reverts to closed/locked after the configured auto-close delay to mirror the gate's physical auto-close behaviour. There is no real-time state feedback from the cloud API.
+State is tracked **optimistically**: after an open/unlock command the entity reports open, then automatically reverts to closed/locked after the configured auto-close delay to mirror the gate's physical auto-close behaviour. There is no real-time state feedback from the cloud API for Solo devices.
+
+**Dory** (three entities per Dory, under one device row)
+
+| Entity type | Device class | Category | Notes |
+|-------------|--------------|----------|-------|
+| Binary sensor | Garage door | — | On = open, off = closed; mirrors the state the Dory last reported to the cloud |
+| Sensor (Battery) | Enum (`low` / `medium` / `high`) | — | Categorised from the Dory's 2× CR2032 cell-pair voltage. Raw mV value still available as the `raw_mv` attribute |
+| Sensor (Last state change) | Timestamp | Diagnostic | When the Dory most recently transitioned between open and closed |
+
+Dory state is **cloud-polled** rather than push-driven: the entity reflects whatever the cloud most recently received from the sensor, so end-to-end latency depends on both the polling interval and how often the Dory itself reports. To stay automation-friendly, Dory entities deliberately **do not flip to "unavailable" on transient cloud hiccups** — they keep showing the last known state until the next successful poll.
 
 ## Options
 
@@ -106,6 +130,7 @@ Open the integration's **Configure** button (**Settings → Devices & Services �
 
 - **Auto-close delay** — seconds after an open command before Home Assistant marks the gate as closed again. Tune this to match your gate's physical auto-close timing.
 - **PIN** — optional. Leave empty (default) to keep the standard cover entity with no PIN. Enter a value to expose the gate as a **lock** entity instead: Home Assistant's lock card will then prompt for this PIN before opening or closing. All-digit PINs show a numeric keypad.
+- **Dory polling interval** *(only shown if your account has Dory sensors)* — how often Home Assistant polls the 1Control cloud for Dory state. Default 60 s; minimum 30 s. Lower values give faster updates at the cost of more requests to the 1Control API; the cloud-side state only updates as fast as the sensor itself reports, so very low values offer diminishing returns.
 
 Changing the PIN (setting, clearing, or updating it) reloads the integration and swaps between the cover and lock entity. Existing dashboard cards and automations referencing the old entity ID will need to be updated to the new one.
 
@@ -124,18 +149,20 @@ Home Assistant
       ▼
 1Control Cloud API (onecontrolcloud.appspot.com)
       │
-      │  trigger command
-      ▼
-   Link bridge  ──►  Solo device  ──►  gate/door
+      ├── trigger command ──►  Link bridge  ──►  Solo device  ──►  gate/door
+      │
+      └── poll state     ◄──  Dory sensor (door position + battery)
 ```
 
 **Your credentials are never sent anywhere except 1Control's own servers.** The email and password you enter are used solely to obtain a Firebase ID token from 1Control's authentication service — the same call the official mobile app makes. The token is short-lived and automatically refreshed; your password is only used again if the refresh token expires. No credentials are logged or transmitted to any third party.
 
 ## Troubleshooting
 
-- **"No devices found"** — ensure your Solo has at least one configured action (cloned action) in the 1Control app, and that a Link bridge is paired to it.
+- **"No devices found"** — for Solo, ensure it has at least one configured action (cloned action) in the 1Control app and that a Link bridge is paired to it. For Dory-only accounts, ensure the Dory is registered to your 1Control account.
 - **"Invalid auth"** — double-check your 1Control app email and password.
 - **Gate triggered but HA shows error** — check the HA logs (`Settings → System → Logs`) for details from the `onecontrol` component.
+- **Dory state is stale** — Dory is cloud-polled; the displayed state reflects the latest update the cloud has from the sensor. Drop the polling interval in the integration options if you need faster refreshes, but note that the cloud itself only updates as fast as the Dory reports.
+- **A new Dory (or Solo) doesn't appear after I added it in the 1Control app** — devices are snapshotted at integration setup. Remove and re-add the integration to pick up newly added hardware.
 
 ## Contributing
 

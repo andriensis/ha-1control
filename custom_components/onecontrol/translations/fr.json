@@ -34,11 +34,13 @@
         "title": "Options 1Control",
         "data": {
           "auto_close_delay": "Délai de fermeture automatique",
-          "pin": "Code PIN"
+          "pin": "Code PIN",
+          "dory_update_interval": "Intervalle d'interrogation Dory"
         },
         "data_description": {
           "auto_close_delay": "Secondes après une commande d'ouverture avant que Home Assistant ne marque le portail comme fermé.",
-          "pin": "Optionnel. Si défini, le portail est exposé en tant qu'entité lock et ce code PIN doit être saisi pour l'ouvrir ou le fermer. Laissez vide pour utiliser une entité cover standard sans PIN."
+          "pin": "Optionnel. Si défini, le portail est exposé en tant qu'entité lock et ce code PIN doit être saisi pour l'ouvrir ou le fermer. Laissez vide pour utiliser une entité cover standard sans PIN.",
+          "dory_update_interval": "Fréquence d'interrogation du cloud 1Control pour l'état du capteur de porte Dory. Des valeurs plus basses donnent des mises à jour plus rapides mais augmentent la charge sur l'API 1Control; l'état côté cloud ne se met de toute façon à jour qu'à la cadence à laquelle le capteur le rapporte."
         }
       }
     }
@@ -46,6 +48,21 @@
   "exceptions": {
     "invalid_pin": {
       "message": "Code PIN incorrect."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "battery": {
+        "name": "Batterie",
+        "state": {
+          "low": "Faible",
+          "medium": "Moyenne",
+          "high": "Élevée"
+        }
+      },
+      "last_state_change": {
+        "name": "Dernier changement d'état"
+      }
     }
   }
 }

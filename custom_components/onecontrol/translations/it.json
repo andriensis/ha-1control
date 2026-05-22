@@ -34,11 +34,13 @@
         "title": "Opzioni 1Control",
         "data": {
           "auto_close_delay": "Ritardo di auto-chiusura",
-          "pin": "PIN"
+          "pin": "PIN",
+          "dory_update_interval": "Intervallo di polling Dory"
         },
         "data_description": {
           "auto_close_delay": "Secondi dopo un comando di apertura prima che Home Assistant segni il cancello come chiuso.",
-          "pin": "Opzionale. Se impostato, il cancello viene esposto come entità lock e questo PIN è richiesto per aprirlo o chiuderlo. Lascia vuoto per usare l'entità cover standard senza PIN."
+          "pin": "Opzionale. Se impostato, il cancello viene esposto come entità lock e questo PIN è richiesto per aprirlo o chiuderlo. Lascia vuoto per usare l'entità cover standard senza PIN.",
+          "dory_update_interval": "Ogni quanto interrogare il cloud 1Control per lo stato del sensore Dory. Valori più bassi danno aggiornamenti più rapidi ma aumentano il carico sull'API 1Control; lo stato lato cloud comunque si aggiorna solo alla velocità con cui il sensore lo riporta."
         }
       }
     }
@@ -46,6 +48,21 @@
   "exceptions": {
     "invalid_pin": {
       "message": "PIN errato."
+    }
+  },
+  "entity": {
+    "sensor": {
+      "battery": {
+        "name": "Batteria",
+        "state": {
+          "low": "Bassa",
+          "medium": "Media",
+          "high": "Alta"
+        }
+      },
+      "last_state_change": {
+        "name": "Ultimo cambio di stato"
+      }
     }
   }
 }
