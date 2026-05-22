@@ -53,7 +53,12 @@
   "entity": {
     "sensor": {
       "battery": {
-        "name": "Batteria"
+        "name": "Batteria",
+        "state": {
+          "low": "Bassa",
+          "medium": "Media",
+          "high": "Alta"
+        }
       },
       "last_state_change": {
         "name": "Ultimo cambio di stato"

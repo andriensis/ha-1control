@@ -119,7 +119,7 @@ State is tracked **optimistically**: after an open/unlock command the entity rep
 | Entity type | Device class | Category | Notes |
 |-------------|--------------|----------|-------|
 | Binary sensor | Garage door | — | On = open, off = closed; mirrors the state the Dory last reported to the cloud |
-| Sensor (Battery) | — | — | Raw value as reported by the device |
+| Sensor (Battery) | Enum (`low` / `medium` / `high`) | — | Categorised from the Dory's 2× CR2032 cell-pair voltage. Raw mV value still available as the `raw_mv` attribute |
 | Sensor (Last state change) | Timestamp | Diagnostic | When the Dory most recently transitioned between open and closed |
 
 Dory state is **cloud-polled** rather than push-driven: the entity reflects whatever the cloud most recently received from the sensor, so end-to-end latency depends on both the polling interval and how often the Dory itself reports. To stay automation-friendly, Dory entities deliberately **do not flip to "unavailable" on transient cloud hiccups** — they keep showing the last known state until the next successful poll.

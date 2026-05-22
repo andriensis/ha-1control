@@ -33,3 +33,9 @@ AUTO_CLOSE_DELAY = 10
 DORY_UPDATE_INTERVAL = 60
 DORY_UPDATE_INTERVAL_MIN = 30
 DORY_UPDATE_INTERVAL_MAX = 600
+
+# Dory battery is 2× CR2032 in series. Raw API value is the cell-pair voltage
+# in millivolts. CR2032 nominal is 3.0V (so 6000 mV fresh) and the discharge
+# curve stays flat until roughly 2.5V/cell (5000 mV total) where it falls off a cliff.
+DORY_BATTERY_HIGH_MV = 5700
+DORY_BATTERY_MEDIUM_MV = 5300

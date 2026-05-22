@@ -6,7 +6,6 @@ from datetime import datetime
 from homeassistant.components.sensor import (
     SensorDeviceClass,
     SensorEntity,
-    SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
@@ -15,8 +14,17 @@ from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import CONF_DORY_DEVICES, DOMAIN
+from .const import (
+    CONF_DORY_DEVICES,
+    DOMAIN,
+    DORY_BATTERY_HIGH_MV,
+    DORY_BATTERY_MEDIUM_MV,
+)
 from .coordinator import DoryCoordinator
+
+BATTERY_LEVEL_HIGH = "high"
+BATTERY_LEVEL_MEDIUM = "medium"
+BATTERY_LEVEL_LOW = "low"
 
 
 async def async_setup_entry(
@@ -64,28 +72,62 @@ class _DorySensorBase(CoordinatorEntity[DoryCoordinator], SensorEntity):
 
 
 class OneControlDoryBatterySensor(_DorySensorBase):
-    """Raw battery reading reported by the Dory.
+    """Battery level categorised from the Dory's 2x CR2032 cell-pair voltage.
 
-    Units unverified — the 1Control API exposes the value as a float (e.g. 5929.0)
-    with no documented scale. Surfaced as-is so users can build their own
-    template sensors / thresholds without us guessing wrong.
+    The 1Control API exposes a raw float (e.g. 5929.0) that maps to mV across
+    both cells in series. Field reports peg ~5900 as "fresh" (close to the
+    2x3.0V nominal). We bucket into low/medium/high per the thresholds in
+    const.py and expose the raw value as an attribute for power users.
     """
 
     _attr_translation_key = "battery"
-    _attr_state_class = SensorStateClass.MEASUREMENT
-    _attr_icon = "mdi:battery"
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = [BATTERY_LEVEL_LOW, BATTERY_LEVEL_MEDIUM, BATTERY_LEVEL_HIGH]
 
     def __init__(self, coordinator: DoryCoordinator, device: dict) -> None:
         super().__init__(coordinator, device)
         self._attr_unique_id = f"{DOMAIN}_dory_{self._serial}_battery"
 
-    @property
-    def native_value(self) -> float | None:
+    def _raw_mv(self) -> float | None:
         data = self._state()
         if data is None:
             return None
         value = data.get("battery")
-        return float(value) if value is not None else None
+        if value is None:
+            return None
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return None
+
+    @property
+    def native_value(self) -> str | None:
+        mv = self._raw_mv()
+        if mv is None:
+            return None
+        if mv >= DORY_BATTERY_HIGH_MV:
+            return BATTERY_LEVEL_HIGH
+        if mv >= DORY_BATTERY_MEDIUM_MV:
+            return BATTERY_LEVEL_MEDIUM
+        return BATTERY_LEVEL_LOW
+
+    @property
+    def icon(self) -> str:
+        # ENUM device class doesn't auto-pick an icon. Render a battery glyph
+        # that matches the current bucket so dashboards get a visual cue.
+        state = self.native_value
+        if state == BATTERY_LEVEL_HIGH:
+            return "mdi:battery"
+        if state == BATTERY_LEVEL_MEDIUM:
+            return "mdi:battery-50"
+        if state == BATTERY_LEVEL_LOW:
+            return "mdi:battery-alert"
+        return "mdi:battery-unknown"
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        mv = self._raw_mv()
+        return {"raw_mv": mv} if mv is not None else {}
 
 
 class OneControlDoryLastChangedSensor(_DorySensorBase):
